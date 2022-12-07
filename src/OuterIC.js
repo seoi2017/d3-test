@@ -59,6 +59,7 @@ const x = d3.scaleBand()
 
 const Chart = () => {
   const [layout, layoutCtrl] = useToggle('stacked', 'grouped');
+  const [rect, setRect] = useSafeState();
 
   const chartRef = useD3(svg => {
     const rect = svg.selectAll("g")
@@ -86,12 +87,11 @@ const Chart = () => {
       .transition()
       .attr("x", (d, i) => x(i))
       .attr("width", x.bandwidth());
+
+    setRect(rect);
   });
 
   useUpdateEffect(() => {
-    const rect = d3.select(chartRef.current)
-      .selectAll("g");
-
     if (!rect) {
       return;
     } else if (layout === "stacked") {
@@ -150,4 +150,5 @@ const Chart = () => {
   );
 };
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default () => <Chart />;
