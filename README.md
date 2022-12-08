@@ -1,70 +1,53 @@
-# Getting Started with Create React App
+# React + D3.js 交互功能测试
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+本仓库中代码旨在对D3.js可视化库在React框架下的交互式应用进行尝试，并找到使两者高效结合，共同协作的一个可行解决方案。
 
-## Available Scripts
+D3.js与React框架结合应用的主要问题在于D3.js需要对DOM节点的完全控制，然而React框架的设计哲学是尽可能避免对DOM的直接操作，因此两者在设计理念上存在不兼容之处。
 
-In the project directory, you can run:
+虽然React具有JSX语法，看起来似乎是在JS中嵌入了类似HTML的DOM树，然而这些都是虚拟DOM节点，与实际渲染时的DOM不同，D3.js不能直接对这些虚拟DOM进行操作；因此，一般的解决方法是在React组件中给出一个DOM节点的引用（`ref`），让D3.js全权控制这个节点内部的部分，其他的部分还是由React框架处理。
 
-### `npm start`
+这种做法实质上就是把一个D3.js实例套了一层React组件的封装，因为毕竟不是React组件的话是不能与整个框架相兼容的。但这时候就会出现一个大问题，就是要可视化的目标数据怎么传到D3.js手里。一般的思路肯定是上级组件把数据丢到封装着D3.js的外层React组件里面，然后React组件因为属性更改触发重渲染，在重渲染的生命周期方法里面把新的数据丢到D3.js控制的DOM节点里头去，相关的动效啥的也都能在这里头做。
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+这种方法一开始确实是好使的，对于类似React严格模式引起的二次渲染等问题也有处理办法。在早期React框架中对组件的类定义写法中，可以通过生命周期函数阻止数据、参数、状态变化引起的组件重复渲染，从而起到为D3.js屏蔽外部干扰的效果，通过这种方法可以使得D3.js在基于类组件的React应用中得到应用。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+然而，最近新版本的React框架推荐基于钩子和函数式组件的写法，这之中并不提供严格的生命周期方法，只能使用钩子进行模拟，这又使得类似重复渲染的问题得不到解决了，但是又不能阻挡历史的进程和技术的发展，所以还是要研究一下函数式组件怎么和D3.js结合起来。
 
-### `npm test`
+经过一些尝试和研究，我发现主要问题有以下几点：
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- 
 
-### `npm run build`
+## 文件与功能
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+本仓库中有工程开发意义的文件基本都在`./src`目录下，其各自含义如下：
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- `index.js`：前端应用入口点（根组件），包含切换展示图表的逻辑
+- `index.css`：根组件的层叠样式表文档，没什么需要关注的
+- `hooks.js`：封装了提供D3.js所需`<svg />`元素引用（`ref`）的钩子
+- `InnerIC.js`：不与父组件有参数传递关系，所有交互操作完全包含在图表内部的图表组件（不受控）
+- `OuterIC.js`：具有外部参数传入，并且父组件可以在外部对参数进行修改从而触发交互效果的组件（受控）
+- `ZoomIC.js`：所需要展示的数据也完全依靠外部传入，需要在数据发生变化是触发平滑过渡切换，并且具有水平轴向缩放交互的组件（受控）
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 部署与运行
 
-### `npm run eject`
+首先通过如下代码将此仓库克隆到本地，并在控制台将工作目录切换到仓库根目录下：
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+git clone https://github.com/seoi2017/d3-test.git
+cd d3-text
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+确认您的计算机上拥有node.js运行时环境，之后如果您使用`npm`包管理器，可使用如下指令安装依赖：
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+如果您使用`yarn`包管理器，可使用如下指令安装依赖：
 
-## Learn More
+```
+yarn
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+依赖安装完毕后，您可以使用`npm run start`或者`yarn start`命令启动前端测试环境，编译成功后您可以在浏览器中访问`http://localhost:3000`进行交互操作测试和观察图表形态。
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 测试场景说明

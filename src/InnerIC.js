@@ -24,7 +24,7 @@ const arc = d3.arc()
   .innerRadius(d => d.y0 * radius)
   .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-function Chart({ data }) {
+const Chart = () => {
   const clicked = (root, g, path, label, parent, p) => {
     parent.datum(p.parent || root);
 
@@ -107,7 +107,7 @@ function Chart({ data }) {
       .attr("fill", "none")
       .attr("pointer-events", "all")
       .on("click", (_, p) => clicked(root, g, path, label, parent, p));
-  }, [data]);
+  }, []);
 
   return (
     <svg
@@ -123,4 +123,4 @@ function Chart({ data }) {
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default () => <Chart data={data} />;
+export default () => <Chart />;
